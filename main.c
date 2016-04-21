@@ -3,10 +3,10 @@
 #include "list.h"
 
 #define WHITE	0 // unvisited node
-#define BLACK	1 // node is part of a negative cycl
+#define BLACK	1 // node is part of a negative cycle
 #define GREY	2 // temporary for algorith iterations
-#define INF 	2147000000
-#define BIG		2000000000
+#define INF 	32760 // 2147000000
+#define BIG 	20000 // 2000000000
 #define NONE	-1
 
 typedef struct vertex{
@@ -56,16 +56,15 @@ void BBellmanFord(vertex_t *vertices, int source, int N){
 		if (!changed) break;
 	}
 
-	for (j=0; j<N; j++) // negative cycles iteration, finds cycle root
-		for (node=vertices[j].adj->head; node!=NULL; node=node->next)
-			if (vertices[j].dist+node->weight < vertices[node->value].dist)
-				BBFS(vertices, j);
+	for (j=0; j<N; j++) for (node=vertices[j].adj->head; node!=NULL; node=node->next)
+		if (vertices[j].dist+node->weight < vertices[node->value].dist)
+			BBFS(vertices, j);
 }
 
 int minOf(int *vect, int N){
-	int j=0;
+	int i, j=0;
 
-	for (int i=0; i<N; i++)
+	for (i=0; i<N; i++)
 		if (vect[i] < vect[j])
 			j = i;
 
@@ -86,7 +85,7 @@ int main(int argc, char const *argv[]){
 
 	/* BRANCHES */
 	int branches[F], totals[N];
-	int *costs = (int*) calloc(F*N, sizeof(int));
+	short *costs = (short*) calloc(F*N, sizeof(short));
 	for (i=0; i<F; i++)	scanf("%d", &branches[i]);
 
 	vertex_t *locals = (vertex_t*) malloc(N*sizeof(vertex_t));
