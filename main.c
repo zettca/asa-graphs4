@@ -14,31 +14,6 @@ typedef struct vertex{
 	list_t *adj;
 } vertex_t;
 
-
-void BBFS(vertex_t *vertices, int source){
-	list_t *queue = list_init();
-	list_node_t *node;
-	int v, w;
-
-	list_push(queue, source, 0);
-	vertices[source].color = GREY;
-	
-	while (!list_empty(queue)){
-		v = list_peek(queue)->value;
-		list_pop(queue);
-		for (node=vertices[v].adj->head; node!=NULL ; node=node->next){
-			w = node->value;
-			if (!vertices[w].color){
-				vertices[w].color = GREY;
-				list_push(queue, w, 0);
-			}
-		}
-		vertices[v].color = BLACK;
-	}
-	
-	list_destroy(queue);
-}
-
 void BBellmanFord(vertex_t *vertices, int source, int N){
 	list_node_t *node;
 	int i, j, changed;
@@ -55,10 +30,6 @@ void BBellmanFord(vertex_t *vertices, int source, int N){
 			}
 		if (!changed) break;
 	}
-
-	for (j=0; j<N; j++) for (node=vertices[j].adj->head; node!=NULL; node=node->next)
-		if (vertices[j].dist+node->weight < vertices[node->value].dist)
-			BBFS(vertices, j);
 }
 
 int minOf(int *vect, int N){
