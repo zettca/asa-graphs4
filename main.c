@@ -72,6 +72,10 @@ int minOf(int *vect, int N){
 	return j;
 }
 
+int at(int i, int j, int N){
+	return i*N+j;
+}
+
 
 int main(int argc, char const *argv[]){
 	int N=2, F=2, C=1;	// Locals, Branches, Connections
@@ -81,12 +85,9 @@ int main(int argc, char const *argv[]){
 	scanf("%d %d %d", &N, &F, &C);
 
 	/* BRANCHES */
-	int **costs = (int**) malloc((F+1)*sizeof(int));
-	int branches[F];
-	for (i=0; i<F; i++){
-		scanf("%d", &branches[i]);
-		costs[i] = malloc(N*sizeof(int));
-	} costs[F] = malloc(N*sizeof(int));
+	int branches[F], totals[N];
+	int *costs = (int*) calloc(F*N, sizeof(int));
+	for (i=0; i<F; i++)	scanf("%d", &branches[i]);
 
 	vertex_t *locals = (vertex_t*) malloc(N*sizeof(vertex_t));
 	for (i=0; i<N; i++) locals[i].adj = list_init();
@@ -97,40 +98,36 @@ int main(int argc, char const *argv[]){
 	}
 
 	for (i=0; i<N; i++){ // vertices init
-		costs[F][i] = 0;
+		totals[i] = 0;
 		locals[i].value = i;
 		locals[i].dist = INF;
 		locals[i].prev = NONE;
 		locals[i].color = WHITE;
 	}
 
-
 	for (i=0; i<F; i++){
 		BBellmanFord(locals, branches[i]-1, N);
 		for (j=0; j<N; j++){
-			costs[i][j] = locals[j].dist;
-			costs[F][j] = (costs[i][j]<BIG) ? costs[F][j]+costs[i][j] : INF ; // meh
+			costs[at(i, j, N)] = locals[j].dist;
+			totals[j] = (costs[at(i, j, N)]<BIG) ? totals[j]+costs[at(i, j, N)] : INF ; // meh
 			locals[j].dist = INF;
 		}
 	}
 
 	/* OUTPUTS */
-	int best = minOf(costs[F], N);
-	if (costs[F][best]<BIG){
-		printf("%d %d\n", best+1, costs[F][best]);
-		for (i=0; i<F; i++) printf("%d ", costs[i][best]);
+	int best = minOf(totals, N);
+	if (totals[best]<BIG){
+		printf("%d %d\n", best+1, totals[best]);
+		for (i=0; i<F; i++) printf("%d ", costs[at(i, best, N)]);
 	} else{
 		printf("N");
 	}
 	printf("\n");
 
-
 	/* FREE MEMORY */
-	/*for(i=0; i<N; i++) list_destroy(locals[i].adj);
-	for(i=0; i<=F; i++) free(costs[i]);
+	for(i=0; i<N; i++) list_destroy(locals[i].adj);
 	free(locals);
 	free(costs);
-	free(branches);*/
 
 	return 0;
 }
