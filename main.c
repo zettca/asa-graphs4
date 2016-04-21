@@ -5,7 +5,7 @@
 #define WHITE	0 // unvisited node
 #define BLACK	1 // node is part of a negative cycle
 #define GREY	2 // temporary for algorith iterations
-#define INF 	32760 // 2147000000
+#define INF 	30000 // 2147000000
 #define BIG 	20000 // 2000000000
 #define NONE	-1
 
