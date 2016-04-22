@@ -2,15 +2,12 @@
 #include <stdlib.h>
 #include "list.h"
 
-#define WHITE	0 // unvisited node
-#define BLACK	1 // node is part of a negative cycle
-#define GREY	2 // temporary for algorith iterations
 #define INF 	30000 // 2147000000
 #define BIG 	20000 // 2000000000
 #define NONE	-1
 
 typedef struct vertex{
-	int value, dist, prev, color;
+	int value, dist, prev;
 	list_t *adj;
 } vertex_t;
 
@@ -32,21 +29,6 @@ void BBellmanFord(vertex_t *vertices, int source, int N){
 	}
 }
 
-int minOf(int *vect, int N){
-	int i, j=0;
-
-	for (i=0; i<N; i++)
-		if (vect[i] < vect[j])
-			j = i;
-
-	return j;
-}
-
-int at(int i, int j, int N){
-	return i*N+j;
-}
-
-
 int main(int argc, char const *argv[]){
 	int N=2, F=2, C=1;	// Locals, Branches, Connections
 	int i, j, u, v, w;
@@ -55,11 +37,10 @@ int main(int argc, char const *argv[]){
 	scanf("%d %d %d", &N, &F, &C);
 
 	/* BRANCHES */
-	int branches[F], totals[N];
-	short *costs = (short*) calloc(F*N, sizeof(short));
-	for (i=0; i<F; i++)	scanf("%d", &branches[i]);
+	short branches[F], totals[N], costs[F][N];
+	for (i=0; i<F; i++)	scanf("%hd", &branches[i]);
 
-	vertex_t *locals = (vertex_t*) malloc(N*sizeof(vertex_t));
+	vertex_t locals[N];
 	for (i=0; i<N; i++) locals[i].adj = list_init();
 	
 	for (i=0; i<C; i++){ // spot, spot, loss
@@ -72,23 +53,24 @@ int main(int argc, char const *argv[]){
 		locals[i].value = i;
 		locals[i].dist = INF;
 		locals[i].prev = NONE;
-		locals[i].color = WHITE;
 	}
 
 	for (i=0; i<F; i++){
 		BBellmanFord(locals, branches[i]-1, N);
 		for (j=0; j<N; j++){
-			costs[at(i, j, N)] = locals[j].dist;
-			totals[j] = (costs[at(i, j, N)]<BIG) ? totals[j]+costs[at(i, j, N)] : INF ; // meh
+			costs[i][j] = locals[j].dist;
+			totals[j] = (costs[i][j]<BIG) ? totals[j]+costs[i][j] : INF ; // meh
 			locals[j].dist = INF;
 		}
 	}
 
 	/* OUTPUTS */
-	int best = minOf(totals, N);
-	if (totals[best]<BIG){
+	int best = 0;
+	for (i=1; i<N; i++) if (totals[i] < totals[best]) best = i;
+	
+	if (totals[best]<INF){
 		printf("%d %d\n", best+1, totals[best]);
-		for (i=0; i<F; i++) printf("%d ", costs[at(i, best, N)]);
+		for (i=0; i<F; i++) printf("%d ", costs[i][best]);
 	} else{
 		printf("N");
 	}
@@ -96,8 +78,6 @@ int main(int argc, char const *argv[]){
 
 	/* FREE MEMORY */
 	for(i=0; i<N; i++) list_destroy(locals[i].adj);
-	free(locals);
-	free(costs);
 
 	return 0;
 }
