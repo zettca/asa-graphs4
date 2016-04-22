@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "list.h"
 
-#define INF 	30000 // 2147000000
-#define BIG 	20000 // 2000000000
+#define INF 	2147000000
+#define BIG 	2000000000
 #define NONE	-1
 
 typedef struct vertex{
@@ -35,27 +35,24 @@ int main(int argc, char const *argv[]){
 
 	/* INPUTSES */
 	scanf("%d %d %d", &N, &F, &C);
-
-	/* BRANCHES */
-	short branches[F], totals[N], costs[F][N];
-	for (i=0; i<F; i++)	scanf("%hd", &branches[i]);
+	int branches[F], totals[N], costs[F][N];
+	for (i=0; i<F; i++)	scanf("%d", &branches[i]);
 
 	vertex_t locals[N];
-	for (i=0; i<N; i++) locals[i].adj = list_init();
-	
-	for (i=0; i<C; i++){ // spot, spot, loss
-		scanf("%d %d %d", &u, &v, &w);
-		list_push(locals[u-1].adj, v-1, w);
-	}
-
 	for (i=0; i<N; i++){ // vertices init
 		totals[i] = 0;
 		locals[i].value = i;
 		locals[i].dist = INF;
 		locals[i].prev = NONE;
+		locals[i].adj = list_init();
 	}
 
-	for (i=0; i<F; i++){
+	for (i=0; i<C; i++){ // local, local, cost
+		scanf("%d %d %d", &u, &v, &w);
+		list_push(locals[u-1].adj, v-1, w);
+	}
+
+	for (i=0; i<F; i++){ // BellmanFord calls + cost savings
 		BBellmanFord(locals, branches[i]-1, N);
 		for (j=0; j<N; j++){
 			costs[i][j] = locals[j].dist;
@@ -64,17 +61,16 @@ int main(int argc, char const *argv[]){
 		}
 	}
 
-	/* OUTPUTS */
+	/* OUTPUTSES */
 	int best = 0;
 	for (i=1; i<N; i++) if (totals[i] < totals[best]) best = i;
-	
 	if (totals[best]<INF){
 		printf("%d %d\n", best+1, totals[best]);
 		for (i=0; i<F; i++) printf("%d ", costs[i][best]);
+		printf("\n");
 	} else{
-		printf("N");
+		printf("N\n");
 	}
-	printf("\n");
 
 	/* FREE MEMORY */
 	for(i=0; i<N; i++) list_destroy(locals[i].adj);
